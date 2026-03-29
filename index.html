@@ -2,65 +2,91 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프랑스어 퀴즈 - 오답 사이드바 버전</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>프랑스어 퀴즈 - UI 최적화 완료</title>
     <style>
         :root { --primary: #4a90e2; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa; --sidebar-bg: #ffffff; }
-        body { font-family: sans-serif; background-color: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* 레이아웃 구조 */
-        .sidebar { width: 300px; background: var(--sidebar-bg); border-right: 1px solid #ddd; display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
-        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 50px; overflow-y: auto; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* 사이드바 설정 */
+        .sidebar { position: fixed; left: -100%; top: 0; width: 300px; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .sidebar.active { left: 0; }
+        .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .close-sidebar { cursor: pointer; font-size: 1.5rem; }
+        #wrong-list-container { flex: 1; overflow-y: auto; padding: 15px; }
+        .wrong-item { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 0.9rem; color: #c53030; }
 
-        /* 사이드바 스타일 */
-        .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; font-size: 1.1rem; text-align: center; }
-        #wrong-list-container { flex: 1; overflow-y: auto; padding: 10px; }
-        .wrong-item { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 0.9rem; color: #c53030; animation: fadeIn 0.3s ease; }
-        .wrong-item b { color: #2d3748; }
-
-        /* 메인 퀴즈 카드 스타일 */
-        .quiz-container { background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.9rem; color: #666; }
-        .question-card { background: #f0f4f8; padding: 40px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 1.4rem; font-weight: bold; min-height: 80px; display: flex; align-items: center; justify-content: center; }
-        input { width: 80%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px; outline: none; text-align: center; }
-        input:focus { border-color: var(--primary); }
-        .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
-        button { padding: 8px 12px; font-size: 0.85rem; cursor: pointer; border: none; border-radius: 6px; background: var(--primary); color: white; font-weight: bold; }
+        /* 메인 콘텐츠 */
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .quiz-container { background: white; width: 100%; max-width: 480px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
+        
+        .stats { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px; }
+        .question-card { background: #f8fafc; padding: 40px 20px; border-radius: 20px; margin-bottom: 25px; font-size: 1.5rem; font-weight: 800; color: #1e293b; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9; }
+        
+        input { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 14px; outline: none; text-align: center; box-sizing: border-box; transition: 0.2s; }
+        input:focus { border-color: var(--primary); background: #fcfdff; box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1); }
+        
+        /* 버튼 그룹: 모든 버튼을 세로로 길게 정렬하여 균형 유지 */
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+        button { width: 100%; padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 14px; background: var(--primary); color: white; font-weight: bold; transition: 0.2s; }
+        button:active { transform: scale(0.98); opacity: 0.9; }
+        
+        #check-btn { background: #1e293b; font-size: 1.1rem; padding: 18px; margin-bottom: 5px; }
         #shuffle-btn { background: #6c5ce7; }
+        #view-wrong-btn { background: #ff7675; }
         #review-btn { background: #f39c12; display: none; }
-        #reset-btn { background: #95a5a6; }
-        #msg { margin-top: 15px; font-weight: bold; min-height: 24px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        #reset-btn { background: #94a3b8; margin-top: 10px; }
+        
+        #msg { margin-top: 20px; font-weight: bold; min-height: 24px; font-size: 1rem; }
+
+        /* 데스크탑 레이아웃 (768px 이상) */
+        @media (min-width: 768px) {
+            body { flex-direction: row; }
+            .sidebar { position: relative; left: 0; width: 320px; box-shadow: none; border-right: 1px solid #e2e8f0; }
+            .sidebar-header { justify-content: center; }
+            .close-sidebar { display: none; }
+            #view-wrong-btn { display: none; } /* PC에서는 사이드바가 상시 노출되므로 버튼 숨김 */
+        }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-header">❌ 오답 기록 리스트</div>
-        <div id="wrong-list-container">
-            </div>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>❌ 오답 리스트</span>
+            <span class="close-sidebar" onclick="toggleSidebar()">✕</span>
+        </div>
+        <div id="wrong-list-container"></div>
     </div>
 
     <div class="main-content">
         <div class="quiz-container">
-            <div id="mode-badge" style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">일반 모드</div>
-            <h1>프랑스어 동사 변화</h1>
+            <div id="mode-badge" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px; font-weight: 700;">NORMAL MODE</div>
             <div class="stats">
-                <div>문제: <span id="curr-idx">1</span> / <span id="total-idx">84</span></div>
-                <div>누적 오답: <span id="wrong-count">0</span></div>
+                <div>PROGRESS: <span id="curr-idx">1</span> / 84</div>
+                <div>WRONG: <span id="wrong-count">0</span></div>
             </div>
             <div class="question-card" id="q-text">준비 중...</div>
-            <input type="text" id="user-input" placeholder="정답 입력 후 Enter" autocomplete="off">
+            <input type="text" id="user-input" placeholder="정답을 입력하세요" autocomplete="off" autocapitalize="off" spellcheck="false">
+            
             <div class="btn-group">
-                <button onclick="check()">확인</button>
-                <button id="shuffle-btn" onclick="shuffleAndStart()">랜덤 섞기</button>
+                <button id="check-btn" onclick="check()">확인 (ENTER)</button>
+                <button id="shuffle-btn" onclick="shuffleAndStart()">순서 섞기</button>
+                <button id="view-wrong-btn" onclick="toggleSidebar()">오답 확인하기</button>
                 <button id="review-btn" onclick="startReview()">오답만 복습하기</button>
-                <button id="reset-btn" onclick="resetAll()">전체 초기화</button>
+                <button id="reset-btn" onclick="resetAll()">전체 데이터 초기화</button>
             </div>
             <div id="msg"></div>
         </div>
     </div>
 
     <script>
+        // [rawData 데이터는 이전과 동일]
         const rawData = [
             {v:"être", p:"Je", a:"suis"}, {v:"être", p:"Tu", a:"es"}, {v:"être", p:"Il", a:"est"}, {v:"être", p:"Nous", a:"sommes"}, {v:"être", p:"Vous", a:"êtes"}, {v:"être", p:"Ils", a:"sont"},
             {v:"aller", p:"Je", a:"vais"}, {v:"aller", p:"Tu", a:"vas"}, {v:"aller", p:"Elle", a:"va"}, {v:"aller", p:"Nous", a:"allons"}, {v:"aller", p:"Vous", a:"allez"}, {v:"aller", p:"Elles", a:"vont"},
@@ -82,17 +108,21 @@
         let wrongIndices = [];
         let idx = 0;
 
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
         function updateDisplay() {
             const qCard = document.getElementById('q-text');
             if (idx < currentList.length) {
                 const item = currentList[idx];
                 qCard.innerText = `${item.p} (${item.v}) _______`;
                 document.getElementById('curr-idx').innerText = idx + 1;
-                document.getElementById('total-idx').innerText = currentList.length;
                 document.getElementById('user-input').value = "";
                 document.getElementById('user-input').focus();
             } else {
-                qCard.innerText = "학습 완료! 🎉";
+                qCard.innerText = "모든 학습 완료! 🎉";
                 if (wrongIndices.length > 0) document.getElementById('review-btn').style.display = "block";
             }
             updateWrongSidebar();
@@ -121,9 +151,9 @@
                 msg.innerText = "정답입니다! ✨";
                 msg.style.color = "var(--success)";
                 idx++;
-                setTimeout(() => { msg.innerText = ""; updateDisplay(); }, 500);
+                setTimeout(() => { msg.innerText = ""; updateDisplay(); }, 400);
             } else {
-                msg.innerText = `오답! 정답은 [ ${answer} ]`;
+                msg.innerText = `오답! 정답: [ ${answer} ]`;
                 msg.style.color = "var(--error)";
                 const originalIdx = rawData.indexOf(currentList[idx]);
                 if (!wrongIndices.includes(originalIdx)) {
@@ -134,17 +164,19 @@
         }
 
         function shuffleAndStart() {
-            currentList.sort(() => Math.random() - 0.5);
-            idx = 0; wrongIndices = [];
-            document.getElementById('mode-badge').innerText = "랜덤 모드 🎲";
-            document.getElementById('review-btn').style.display = "none";
-            updateDisplay();
+            if(confirm("문제를 랜덤하게 섞고 처음부터 다시 시작할까요?")) {
+                currentList.sort(() => Math.random() - 0.5);
+                idx = 0; wrongIndices = [];
+                document.getElementById('mode-badge').innerText = "RANDOM MODE 🎲";
+                document.getElementById('review-btn').style.display = "none";
+                updateDisplay();
+            }
         }
 
         function startReview() {
             currentList = wrongIndices.map(i => rawData[i]);
             wrongIndices = []; idx = 0;
-            document.getElementById('mode-badge').innerText = "오답 복습 모드 📝";
+            document.getElementById('mode-badge').innerText = "REVIEW MODE 📝";
             document.getElementById('review-btn').style.display = "none";
             updateDisplay();
         }
@@ -157,18 +189,21 @@
         }
 
         function save() {
-            localStorage.setItem('v4_idx', idx);
-            localStorage.setItem('v4_list', JSON.stringify(currentList));
-            localStorage.setItem('v4_wrong', JSON.stringify(wrongIndices));
+            localStorage.setItem('vFinal_idx', idx);
+            localStorage.setItem('vFinal_list', JSON.stringify(currentList));
+            localStorage.setItem('vFinal_wrong', JSON.stringify(wrongIndices));
+            localStorage.setItem('vFinal_mode', document.getElementById('mode-badge').innerText);
         }
 
         function load() {
-            const sIdx = localStorage.getItem('v4_idx');
-            const sList = localStorage.getItem('v4_list');
-            const sWrong = localStorage.getItem('v4_wrong');
+            const sIdx = localStorage.getItem('vFinal_idx');
+            const sList = localStorage.getItem('vFinal_list');
+            const sWrong = localStorage.getItem('vFinal_wrong');
+            const sMode = localStorage.getItem('vFinal_mode');
             if (sList) currentList = JSON.parse(sList);
             if (sIdx) idx = parseInt(sIdx);
             if (sWrong) wrongIndices = JSON.parse(sWrong);
+            if (sMode) document.getElementById('mode-badge').innerText = sMode;
             updateDisplay();
         }
 
