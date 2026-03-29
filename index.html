@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>프랑스어 퀴즈 - UI 최적화 완료</title>
+    <title>프랑스어 퀴즈 - 버그 수정 완료</title>
     <style>
         :root { --primary: #4a90e2; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa; --sidebar-bg: #ffffff; }
-        
         body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* 사이드바 설정 */
+        /* 사이드바 */
         .sidebar { position: fixed; left: -100%; top: 0; width: 300px; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -21,32 +20,30 @@
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         .quiz-container { background: white; width: 100%; max-width: 480px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
         
-        .stats { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
         .question-card { background: #f8fafc; padding: 40px 20px; border-radius: 20px; margin-bottom: 25px; font-size: 1.5rem; font-weight: 800; color: #1e293b; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9; }
         
-        input { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 14px; outline: none; text-align: center; box-sizing: border-box; transition: 0.2s; }
-        input:focus { border-color: var(--primary); background: #fcfdff; box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1); }
+        input { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 14px; outline: none; text-align: center; box-sizing: border-box; }
+        input:focus { border-color: var(--primary); background: #fcfdff; }
         
-        /* 버튼 그룹: 모든 버튼을 세로로 길게 정렬하여 균형 유지 */
         .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
         button { width: 100%; padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 14px; background: var(--primary); color: white; font-weight: bold; transition: 0.2s; }
         button:active { transform: scale(0.98); opacity: 0.9; }
         
-        #check-btn { background: #1e293b; font-size: 1.1rem; padding: 18px; margin-bottom: 5px; }
+        #check-btn { background: #1e293b; font-size: 1.1rem; padding: 18px; }
         #shuffle-btn { background: #6c5ce7; }
         #view-wrong-btn { background: #ff7675; }
         #review-btn { background: #f39c12; display: none; }
         #reset-btn { background: #94a3b8; margin-top: 10px; }
         
-        #msg { margin-top: 20px; font-weight: bold; min-height: 24px; font-size: 1rem; }
+        #msg { margin-top: 20px; font-weight: bold; min-height: 24px; }
 
-        /* 데스크탑 레이아웃 (768px 이상) */
         @media (min-width: 768px) {
             body { flex-direction: row; }
             .sidebar { position: relative; left: 0; width: 320px; box-shadow: none; border-right: 1px solid #e2e8f0; }
             .sidebar-header { justify-content: center; }
             .close-sidebar { display: none; }
-            #view-wrong-btn { display: none; } /* PC에서는 사이드바가 상시 노출되므로 버튼 숨김 */
+            #view-wrong-btn { display: none; }
         }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
@@ -86,7 +83,6 @@
     </div>
 
     <script>
-        // [rawData 데이터는 이전과 동일]
         const rawData = [
             {v:"être", p:"Je", a:"suis"}, {v:"être", p:"Tu", a:"es"}, {v:"être", p:"Il", a:"est"}, {v:"être", p:"Nous", a:"sommes"}, {v:"être", p:"Vous", a:"êtes"}, {v:"être", p:"Ils", a:"sont"},
             {v:"aller", p:"Je", a:"vais"}, {v:"aller", p:"Tu", a:"vas"}, {v:"aller", p:"Elle", a:"va"}, {v:"aller", p:"Nous", a:"allons"}, {v:"aller", p:"Vous", a:"allez"}, {v:"aller", p:"Elles", a:"vont"},
@@ -119,8 +115,6 @@
                 const item = currentList[idx];
                 qCard.innerText = `${item.p} (${item.v}) _______`;
                 document.getElementById('curr-idx').innerText = idx + 1;
-                document.getElementById('user-input').value = "";
-                document.getElementById('user-input').focus();
             } else {
                 qCard.innerText = "모든 학습 완료! 🎉";
                 if (wrongIndices.length > 0) document.getElementById('review-btn').style.display = "block";
@@ -143,7 +137,8 @@
         }
 
         function check() {
-            const input = document.getElementById('user-input').value.trim().toLowerCase();
+            const inputField = document.getElementById('user-input');
+            const input = inputField.value.trim().toLowerCase();
             const answer = currentList[idx].a.toLowerCase();
             const msg = document.getElementById('msg');
 
@@ -151,20 +146,26 @@
                 msg.innerText = "정답입니다! ✨";
                 msg.style.color = "var(--success)";
                 idx++;
-                setTimeout(() => { msg.innerText = ""; updateDisplay(); }, 400);
+                setTimeout(() => { 
+                    msg.innerText = ""; 
+                    updateDisplay(); 
+                }, 400);
             } else {
                 msg.innerText = `오답! 정답: [ ${answer} ]`;
                 msg.style.color = "var(--error)";
-                const originalIdx = rawData.indexOf(currentList[idx]);
+                const currentItem = currentList[idx];
+                const originalIdx = rawData.findIndex(item => item.v === currentItem.v && item.p === currentItem.p && item.a === currentItem.a);
+                
                 if (!wrongIndices.includes(originalIdx)) {
                     wrongIndices.push(originalIdx);
-                    updateWrongSidebar();
                 }
+                updateWrongSidebar();
+                save(); // 오답 즉시 저장
             }
         }
 
         function shuffleAndStart() {
-            if(confirm("문제를 랜덤하게 섞고 처음부터 다시 시작할까요?")) {
+            if(confirm("문제를 무작위로 섞고 처음부터 시작할까요?")) {
                 currentList.sort(() => Math.random() - 0.5);
                 idx = 0; wrongIndices = [];
                 document.getElementById('mode-badge').innerText = "RANDOM MODE 🎲";
@@ -189,21 +190,23 @@
         }
 
         function save() {
-            localStorage.setItem('vFinal_idx', idx);
-            localStorage.setItem('vFinal_list', JSON.stringify(currentList));
-            localStorage.setItem('vFinal_wrong', JSON.stringify(wrongIndices));
-            localStorage.setItem('vFinal_mode', document.getElementById('mode-badge').innerText);
+            localStorage.setItem('v_fixed_idx', idx);
+            localStorage.setItem('v_fixed_list', JSON.stringify(currentList));
+            localStorage.setItem('v_fixed_wrong', JSON.stringify(wrongIndices));
+            localStorage.setItem('v_fixed_mode', document.getElementById('mode-badge').innerText);
         }
 
         function load() {
-            const sIdx = localStorage.getItem('vFinal_idx');
-            const sList = localStorage.getItem('vFinal_list');
-            const sWrong = localStorage.getItem('vFinal_wrong');
-            const sMode = localStorage.getItem('vFinal_mode');
+            const sIdx = localStorage.getItem('v_fixed_idx');
+            const sList = localStorage.getItem('v_fixed_list');
+            const sWrong = localStorage.getItem('v_fixed_wrong');
+            const sMode = localStorage.getItem('v_fixed_mode');
+            
             if (sList) currentList = JSON.parse(sList);
             if (sIdx) idx = parseInt(sIdx);
             if (sWrong) wrongIndices = JSON.parse(sWrong);
             if (sMode) document.getElementById('mode-badge').innerText = sMode;
+            
             updateDisplay();
         }
 
