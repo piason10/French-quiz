@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>프랑스어 퀴즈 - 버그 수정 완료</title>
+    <title>프랑스어 퀴즈 - 입력창 자동 비우기</title>
     <style>
         :root { --primary: #4a90e2; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa; --sidebar-bg: #ffffff; }
         body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* 사이드바 */
         .sidebar { position: fixed; left: -100%; top: 0; width: 300px; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -16,8 +15,7 @@
         #wrong-list-container { flex: 1; overflow-y: auto; padding: 15px; }
         .wrong-item { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 0.9rem; color: #c53030; }
 
-        /* 메인 콘텐츠 */
-        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px 15px; overflow: hidden; width: 100%; box-sizing: border-box; }
         .quiz-container { background: white; width: 100%; max-width: 480px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
         
         .stats { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
@@ -36,7 +34,7 @@
         #review-btn { background: #f39c12; display: none; }
         #reset-btn { background: #94a3b8; margin-top: 10px; }
         
-        #msg { margin-top: 20px; font-weight: bold; min-height: 24px; }
+        #msg { margin-top: 20px; font-weight: bold; min-height: 24px; font-size: 1rem; }
 
         @media (min-width: 768px) {
             body { flex-direction: row; }
@@ -111,13 +109,22 @@
 
         function updateDisplay() {
             const qCard = document.getElementById('q-text');
+            const inputField = document.getElementById('user-input');
+
             if (idx < currentList.length) {
                 const item = currentList[idx];
                 qCard.innerText = `${item.p} (${item.v}) _______`;
                 document.getElementById('curr-idx').innerText = idx + 1;
+                
+                // 🟢 핵심 추가: 입력창 비우기 및 포커스(커서) 유지
+                if (inputField) {
+                    inputField.value = "";
+                    inputField.focus();
+                }
             } else {
                 qCard.innerText = "모든 학습 완료! 🎉";
                 if (wrongIndices.length > 0) document.getElementById('review-btn').style.display = "block";
+                inputField.value = "";
             }
             updateWrongSidebar();
             save();
@@ -146,6 +153,7 @@
                 msg.innerText = "정답입니다! ✨";
                 msg.style.color = "var(--success)";
                 idx++;
+                // 0.4초 뒤에 다음 문제로 넘어가며 입력창이 비워집니다.
                 setTimeout(() => { 
                     msg.innerText = ""; 
                     updateDisplay(); 
@@ -160,12 +168,12 @@
                     wrongIndices.push(originalIdx);
                 }
                 updateWrongSidebar();
-                save(); // 오답 즉시 저장
+                save();
             }
         }
 
         function shuffleAndStart() {
-            if(confirm("문제를 무작위로 섞고 처음부터 시작할까요?")) {
+            if(confirm("문제를 랜덤하게 섞고 처음부터 시작할까요?")) {
                 currentList.sort(() => Math.random() - 0.5);
                 idx = 0; wrongIndices = [];
                 document.getElementById('mode-badge').innerText = "RANDOM MODE 🎲";
@@ -190,17 +198,17 @@
         }
 
         function save() {
-            localStorage.setItem('v_fixed_idx', idx);
-            localStorage.setItem('v_fixed_list', JSON.stringify(currentList));
-            localStorage.setItem('v_fixed_wrong', JSON.stringify(wrongIndices));
-            localStorage.setItem('v_fixed_mode', document.getElementById('mode-badge').innerText);
+            localStorage.setItem('v_final_idx', idx);
+            localStorage.setItem('v_final_list', JSON.stringify(currentList));
+            localStorage.setItem('v_final_wrong', JSON.stringify(wrongIndices));
+            localStorage.setItem('v_final_mode', document.getElementById('mode-badge').innerText);
         }
 
         function load() {
-            const sIdx = localStorage.getItem('v_fixed_idx');
-            const sList = localStorage.getItem('v_fixed_list');
-            const sWrong = localStorage.getItem('v_fixed_wrong');
-            const sMode = localStorage.getItem('v_fixed_mode');
+            const sIdx = localStorage.getItem('v_final_idx');
+            const sList = localStorage.getItem('v_final_list');
+            const sWrong = localStorage.getItem('v_final_wrong');
+            const sMode = localStorage.getItem('v_final_mode');
             
             if (sList) currentList = JSON.parse(sList);
             if (sIdx) idx = parseInt(sIdx);
