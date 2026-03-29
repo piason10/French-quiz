@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>프랑스어 퀴즈 - 진행도 버그 수정</title>
+    <title>프랑스어 퀴즈 - 카테고리 선택형</title>
     <style>
         :root { --primary: #4a90e2; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa; --sidebar-bg: #ffffff; }
         body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
+        /* 사이드바 */
         .sidebar { position: fixed; left: -100%; top: 0; width: 300px; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -15,26 +16,32 @@
         #wrong-list-container { flex: 1; overflow-y: auto; padding: 15px; }
         .wrong-item { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 0.9rem; color: #c53030; }
 
-        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px 15px; overflow: hidden; width: 100%; box-sizing: border-box; }
+        /* 메인 콘텐츠 */
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 30px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         .quiz-container { background: white; width: 100%; max-width: 480px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
         
-        .stats { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
+        /* 카테고리 탭 */
+        .category-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #eee; padding: 5px; border-radius: 12px; }
+        .category-tabs button { flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; background: none; color: #666; cursor: pointer; border: none; }
+        .category-tabs button.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; }
+
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
         .question-card { background: #f8fafc; padding: 40px 20px; border-radius: 20px; margin-bottom: 25px; font-size: 1.5rem; font-weight: 800; color: #1e293b; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9; }
         
         input { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 14px; outline: none; text-align: center; box-sizing: border-box; }
         input:focus { border-color: var(--primary); background: #fcfdff; }
         
-        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
-        button { width: 100%; padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 14px; background: var(--primary); color: white; font-weight: bold; transition: 0.2s; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        button { width: 100%; padding: 14px; font-size: 0.95rem; cursor: pointer; border: none; border-radius: 14px; background: var(--primary); color: white; font-weight: bold; transition: 0.2s; }
         button:active { transform: scale(0.98); opacity: 0.9; }
         
         #check-btn { background: #1e293b; font-size: 1.1rem; padding: 18px; }
         #shuffle-btn { background: #6c5ce7; }
         #view-wrong-btn { background: #ff7675; }
         #review-btn { background: #f39c12; display: none; }
-        #reset-btn { background: #94a3b8; margin-top: 10px; }
+        #reset-btn { background: #94a3b8; margin-top: 5px; }
         
-        #msg { margin-top: 20px; font-weight: bold; min-height: 24px; font-size: 1rem; }
+        #msg { margin-top: 15px; font-weight: bold; min-height: 24px; font-size: 1rem; }
 
         @media (min-width: 768px) {
             body { flex-direction: row; }
@@ -61,7 +68,13 @@
 
     <div class="main-content">
         <div class="quiz-container">
-            <div id="mode-badge" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px; font-weight: 700;">NORMAL MODE</div>
+            <div class="category-tabs">
+                <button id="tab-all" class="active" onclick="changeCategory('all')">전체</button>
+                <button id="tab-irregular" onclick="changeCategory('irregular')">불규칙(7개)</button>
+                <button id="tab-group1" onclick="changeCategory('group1')">1군(7개)</button>
+            </div>
+
+            <div id="mode-badge" style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 8px; font-weight: 700;">NORMAL MODE</div>
             <div class="stats">
                 <div>PROGRESS: <span id="curr-idx">1</span> / <span id="total-idx">84</span></div>
                 <div>WRONG: <span id="wrong-count">0</span></div>
@@ -74,33 +87,53 @@
                 <button id="shuffle-btn" onclick="shuffleAndStart()">순서 섞기</button>
                 <button id="view-wrong-btn" onclick="toggleSidebar()">오답 확인하기</button>
                 <button id="review-btn" onclick="startReview()">오답만 복습하기</button>
-                <button id="reset-btn" onclick="resetAll()">전체 데이터 초기화</button>
+                <button id="reset-btn" onclick="resetAll()">전체 초기화</button>
             </div>
             <div id="msg"></div>
         </div>
     </div>
 
     <script>
+        // 데이터에 타입(t) 추가: i=irregular, g=group1
         const rawData = [
-            {v:"être", p:"Je", a:"suis"}, {v:"être", p:"Tu", a:"es"}, {v:"être", p:"Il", a:"est"}, {v:"être", p:"Nous", a:"sommes"}, {v:"être", p:"Vous", a:"êtes"}, {v:"être", p:"Ils", a:"sont"},
-            {v:"aller", p:"Je", a:"vais"}, {v:"aller", p:"Tu", a:"vas"}, {v:"aller", p:"Elle", a:"va"}, {v:"aller", p:"Nous", a:"allons"}, {v:"aller", p:"Vous", a:"allez"}, {v:"aller", p:"Elles", a:"vont"},
-            {v:"prendre", p:"Je", a:"prends"}, {v:"prendre", p:"Tu", a:"prends"}, {v:"prendre", p:"Il", a:"prend"}, {v:"prendre", p:"Nous", a:"prenons"}, {v:"prendre", p:"Vous", a:"prenez"}, {v:"prendre", p:"Ils", a:"prennent"},
-            {v:"faire", p:"Je", a:"fais"}, {v:"faire", p:"Tu", a:"fais"}, {v:"faire", p:"Elle", a:"fait"}, {v:"faire", p:"Nous", a:"faisons"}, {v:"faire", p:"Vous", a:"faites"}, {v:"faire", p:"Elles", a:"font"},
-            {v:"vouloir", p:"Je", a:"veux"}, {v:"vouloir", p:"Tu", a:"veux"}, {v:"vouloir", p:"Il", a:"veut"}, {v:"vouloir", p:"Nous", a:"voulons"}, {v:"vouloir", p:"Vous", a:"voulez"}, {v:"vouloir", p:"Ils", a:"veulent"},
-            {v:"pouvoir", p:"Je", a:"peux"}, {v:"pouvoir", p:"Tu", a:"peux"}, {v:"pouvoir", p:"Elle", a:"peut"}, {v:"pouvoir", p:"Nous", a:"pouvons"}, {v:"pouvoir", p:"Vous", a:"pouvez"}, {v:"pouvoir", p:"Elles", a:"peuvent"},
-            {v:"savoir", p:"Je", a:"sais"}, {v:"savoir", p:"Tu", a:"sais"}, {v:"savoir", p:"Il", a:"sait"}, {v:"savoir", p:"Nous", a:"savons"}, {v:"savoir", p:"Vous", a:"savez"}, {v:"savoir", p:"Ils", a:"savent"},
-            {v:"aimer", p:"J'", a:"aime"}, {v:"aimer", p:"Tu", a:"aimes"}, {v:"aimer", p:"Elle", a:"aime"}, {v:"aimer", p:"Nous", a:"aimons"}, {v:"aimer", p:"Vous", a:"aimez"}, {v:"aimer", p:"Ils", a:"aiment"},
-            {v:"habiter", p:"J'", a:"habite"}, {v:"habiter", p:"Tu", a:"habites"}, {v:"habiter", p:"Il", a:"habite"}, {v:"habiter", p:"Nous", a:"habitons"}, {v:"habiter", p:"Vous", a:"habitez"}, {v:"habiter", p:"Elles", a:"habitent"},
-            {v:"travailler", p:"Je", a:"travaille"}, {v:"travailler", p:"Tu", a:"travailles"}, {v:"travailler", p:"Elle", a:"travaille"}, {v:"travailler", p:"Nous", a:"travaillons"}, {v:"travailler", p:"Vous", a:"travaillez"}, {v:"travailler", p:"Ils", a:"travaillent"},
-            {v:"rencontrer", p:"Je", a:"rencontre"}, {v:"rencontrer", p:"Tu", a:"rencontres"}, {v:"rencontrer", p:"Il", a:"rencontre"}, {v:"rencontrer", p:"Nous", a:"rencontrons"}, {v:"rencontrer", p:"Vous", a:"rencontrez"}, {v:"rencontrer", p:"Elles", a:"rencontrent"},
-            {v:"arriver", p:"J'", a:"arrive"}, {v:"arriver", p:"Tu", a:"arrives"}, {v:"arriver", p:"Elle", a:"arrive"}, {v:"arriver", p:"Nous", a:"arrivons"}, {v:"arriver", p:"Vous", a:"arrivez"}, {v:"arriver", p:"Ils", a:"arrivent"},
-            {v:"parler", p:"Je", a:"parle"}, {v:"parler", p:"Tu", a:"parles"}, {v:"parler", p:"Il", a:"parle"}, {v:"parler", p:"Nous", a:"parlons"}, {v:"parler", p:"Vous", a:"parlez"}, {v:"parler", p:"Elles", a:"parlent"},
-            {v:"appeler", p:"J'", a:"appelle"}, {v:"appeler", p:"Tu", a:"appelles"}, {v:"appeler", p:"Elle", a:"appelle"}, {v:"appeler", p:"Nous", a:"appelons"}, {v:"appeler", p:"Vous", a:"appelez"}, {v:"appeler", p:"Ils", a:"appellent"}
+            {v:"être", p:"Je", a:"suis", t:"i"}, {v:"être", p:"Tu", a:"es", t:"i"}, {v:"être", p:"Il", a:"est", t:"i"}, {v:"être", p:"Nous", a:"sommes", t:"i"}, {v:"être", p:"Vous", a:"êtes", t:"i"}, {v:"être", p:"Ils", a:"sont", t:"i"},
+            {v:"aller", p:"Je", a:"vais", t:"i"}, {v:"aller", p:"Tu", a:"vas", t:"i"}, {v:"aller", p:"Elle", a:"va", t:"i"}, {v:"aller", p:"Nous", a:"allons", t:"i"}, {v:"aller", p:"Vous", a:"allez", t:"i"}, {v:"aller", p:"Elles", a:"vont", t:"i"},
+            {v:"prendre", p:"Je", a:"prends", t:"i"}, {v:"prendre", p:"Tu", a:"prends", t:"i"}, {v:"prendre", p:"Il", a:"prend", t:"i"}, {v:"prendre", p:"Nous", a:"prenons", t:"i"}, {v:"prendre", p:"Vous", a:"prenez", t:"i"}, {v:"prendre", p:"Ils", a:"prennent", t:"i"},
+            {v:"faire", p:"Je", a:"fais", t:"i"}, {v:"faire", p:"Tu", a:"fais", t:"i"}, {v:"faire", p:"Elle", a:"fait", t:"i"}, {v:"faire", p:"Nous", a:"faisons", t:"i"}, {v:"faire", p:"Vous", a:"faites", t:"i"}, {v:"faire", p:"Elles", a:"font", t:"i"},
+            {v:"vouloir", p:"Je", a:"veux", t:"i"}, {v:"vouloir", p:"Tu", a:"veux", t:"i"}, {v:"vouloir", p:"Il", a:"veut", t:"i"}, {v:"vouloir", p:"Nous", a:"voulons", t:"i"}, {v:"vouloir", p:"Vous", a:"voulez", t:"i"}, {v:"vouloir", p:"Ils", a:"veulent", t:"i"},
+            {v:"pouvoir", p:"Je", a:"peux", t:"i"}, {v:"pouvoir", p:"Tu", a:"peux", t:"i"}, {v:"pouvoir", p:"Elle", a:"peut", t:"i"}, {v:"pouvoir", p:"Nous", a:"pouvons", t:"i"}, {v:"pouvoir", p:"Vous", a:"pouvez", t:"i"}, {v:"pouvoir", p:"Elles", a:"peuvent", t:"i"},
+            {v:"savoir", p:"Je", a:"sais", t:"i"}, {v:"savoir", p:"Tu", a:"sais", t:"i"}, {v:"savoir", p:"Il", a:"sait", t:"i"}, {v:"savoir", p:"Nous", a:"savons", t:"i"}, {v:"savoir", p:"Vous", a:"savez", t:"i"}, {v:"savoir", p:"Ils", a:"savent", t:"i"},
+            {v:"aimer", p:"J'", a:"aime", t:"g"}, {v:"aimer", p:"Tu", a:"aimes", t:"g"}, {v:"aimer", p:"Elle", a:"aime", t:"g"}, {v:"aimer", p:"Nous", a:"aimons", t:"g"}, {v:"aimer", p:"Vous", a:"aimez", t:"g"}, {v:"aimer", p:"Ils", a:"aiment", t:"g"},
+            {v:"habiter", p:"J'", a:"habite", t:"g"}, {v:"habiter", p:"Tu", a:"habites", t:"g"}, {v:"habiter", p:"Il", a:"habite", t:"g"}, {v:"habiter", p:"Nous", a:"habitons", t:"g"}, {v:"habiter", p:"Vous", a:"habitez", t:"g"}, {v:"habiter", p:"Elles", a:"habitent", t:"g"},
+            {v:"travailler", p:"Je", a:"travaille", t:"g"}, {v:"travailler", p:"Tu", a:"travailles", t:"g"}, {v:"travailler", p:"Elle", a:"travaille", t:"g"}, {v:"travailler", p:"Nous", a:"travaillons", t:"g"}, {v:"travailler", p:"Vous", a:"travaillez", t:"g"}, {v:"travailler", p:"Ils", a:"travaillent", t:"g"},
+            {v:"rencontrer", p:"Je", a:"rencontre", t:"g"}, {v:"rencontrer", p:"Tu", a:"rencontres", t:"g"}, {v:"rencontrer", p:"Il", a:"rencontre", t:"g"}, {v:"rencontrer", p:"Nous", a:"rencontrons", t:"g"}, {v:"rencontrer", p:"Vous", a:"rencontrez", t:"g"}, {v:"rencontrer", p:"Elles", a:"rencontrent", t:"g"},
+            {v:"arriver", p:"J'", a:"arrive", t:"g"}, {v:"arriver", p:"Tu", a:"arrives", t:"g"}, {v:"arriver", p:"Elle", a:"arrive", t:"g"}, {v:"arriver", p:"Nous", a:"arrivons", t:"g"}, {v:"arriver", p:"Vous", a:"arrivez", t:"g"}, {v:"arriver", p:"Ils", a:"arrivent", t:"g"},
+            {v:"parler", p:"Je", a:"parle", t:"g"}, {v:"parler", p:"Tu", a:"parles", t:"g"}, {v:"parler", p:"Il", a:"parle", t:"g"}, {v:"parler", p:"Nous", a:"parlons", t:"g"}, {v:"parler", p:"Vous", a:"parlez", t:"g"}, {v:"parler", p:"Elles", a:"parlent", t:"g"},
+            {v:"appeler", p:"J'", a:"appelle", t:"g"}, {v:"appeler", p:"Tu", a:"appelles", t:"g"}, {v:"appeler", p:"Elle", a:"appelle", t:"g"}, {v:"appeler", p:"Nous", a:"appelons", t:"g"}, {v:"appeler", p:"Vous", a:"appelez", t:"g"}, {v:"appeler", p:"Ils", a:"appellent", t:"g"}
         ];
 
         let currentList = [...rawData];
         let wrongIndices = [];
         let idx = 0;
+        let currentCategory = 'all';
+
+        function changeCategory(cat) {
+            currentCategory = cat;
+            idx = 0;
+            wrongIndices = [];
+            
+            // 탭 활성화 UI 처리
+            document.querySelectorAll('.category-tabs button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${cat}`).classList.add('active');
+
+            // 필터링
+            if (cat === 'all') currentList = [...rawData];
+            else if (cat === 'irregular') currentList = rawData.filter(d => d.t === 'i');
+            else if (cat === 'group1') currentList = rawData.filter(d => d.t === 'g');
+
+            document.getElementById('mode-badge').innerText = `${cat.toUpperCase()} MODE`;
+            updateDisplay();
+        }
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -115,18 +148,13 @@
                 const item = currentList[idx];
                 qCard.innerText = `${item.p} (${item.v}) _______`;
                 document.getElementById('curr-idx').innerText = idx + 1;
-                
-                // 🛠 핵심 수정: 전체 개수 표시를 현재 리스트 길이로 업데이트
                 document.getElementById('total-idx').innerText = currentList.length;
-                
                 inputField.value = "";
                 inputField.focus();
             } else {
-                qCard.innerText = "모든 학습 완료! 🎉";
-                // 학습 완료 시 진행도 표시 (예: 5/5)
+                qCard.innerText = "카테고리 학습 완료! 🎉";
                 document.getElementById('curr-idx').innerText = currentList.length;
                 document.getElementById('total-idx').innerText = currentList.length;
-                
                 if (wrongIndices.length > 0) document.getElementById('review-btn').style.display = "block";
                 inputField.value = "";
             }
@@ -137,8 +165,8 @@
         function updateWrongSidebar() {
             const container = document.getElementById('wrong-list-container');
             container.innerHTML = "";
-            wrongIndices.forEach(i => {
-                const item = rawData[i];
+            wrongIndices.forEach(originalIdx => {
+                const item = rawData[originalIdx];
                 const div = document.createElement('div');
                 div.className = "wrong-item";
                 div.innerHTML = `<b>${item.v}</b>: ${item.p} <br>정답: <b>${item.a}</b>`;
@@ -157,10 +185,7 @@
                 msg.innerText = "정답입니다! ✨";
                 msg.style.color = "var(--success)";
                 idx++;
-                setTimeout(() => { 
-                    msg.innerText = ""; 
-                    updateDisplay(); 
-                }, 400);
+                setTimeout(() => { msg.innerText = ""; updateDisplay(); }, 400);
             } else {
                 msg.innerText = `오답! 정답: [ ${answer} ]`;
                 msg.style.color = "var(--error)";
@@ -176,49 +201,51 @@
         }
 
         function shuffleAndStart() {
-            if(confirm("문제를 랜덤하게 섞고 처음부터 시작할까요?")) {
+            if(confirm("현재 범위를 랜덤하게 섞고 다시 시작할까요?")) {
                 currentList.sort(() => Math.random() - 0.5);
                 idx = 0; wrongIndices = [];
-                document.getElementById('mode-badge').innerText = "RANDOM MODE 🎲";
+                document.getElementById('mode-badge').innerText = "RANDOM " + currentCategory.toUpperCase();
                 document.getElementById('review-btn').style.display = "none";
                 updateDisplay();
             }
         }
 
         function startReview() {
-            // 오답 리스트로 새로운 퀴즈 리스트 생성
             currentList = wrongIndices.map(i => rawData[i]);
-            wrongIndices = []; 
-            idx = 0; 
+            wrongIndices = []; idx = 0;
             document.getElementById('mode-badge').innerText = "REVIEW MODE 📝";
             document.getElementById('review-btn').style.display = "none";
-            updateDisplay(); // 여기서 total-idx가 자동으로 업데이트됩니다.
+            updateDisplay();
         }
 
         function resetAll() {
-            if(confirm("모든 데이터를 초기화할까요?")) {
+            if(confirm("모든 데이터를 지우고 전체 모드로 돌아갈까요?")) {
                 localStorage.clear();
                 location.reload();
             }
         }
 
         function save() {
-            localStorage.setItem('v_final_idx_v2', idx);
-            localStorage.setItem('v_final_list_v2', JSON.stringify(currentList));
-            localStorage.setItem('v_final_wrong_v2', JSON.stringify(wrongIndices));
-            localStorage.setItem('v_final_mode_v2', document.getElementById('mode-badge').innerText);
+            localStorage.setItem('vCat_idx', idx);
+            localStorage.setItem('vCat_list', JSON.stringify(currentList));
+            localStorage.setItem('vCat_wrong', JSON.stringify(wrongIndices));
+            localStorage.setItem('vCat_cat', currentCategory);
         }
 
         function load() {
-            const sIdx = localStorage.getItem('v_final_idx_v2');
-            const sList = localStorage.getItem('v_final_list_v2');
-            const sWrong = localStorage.getItem('v_final_wrong_v2');
-            const sMode = localStorage.getItem('v_final_mode_v2');
+            const sIdx = localStorage.getItem('vCat_idx');
+            const sList = localStorage.getItem('vCat_list');
+            const sWrong = localStorage.getItem('vCat_wrong');
+            const sCat = localStorage.getItem('vCat_cat');
             
+            if (sCat) {
+                currentCategory = sCat;
+                document.querySelectorAll('.category-tabs button').forEach(b => b.classList.remove('active'));
+                document.getElementById(`tab-${sCat}`).classList.add('active');
+            }
             if (sList) currentList = JSON.parse(sList);
             if (sIdx) idx = parseInt(sIdx);
             if (sWrong) wrongIndices = JSON.parse(sWrong);
-            if (sMode) document.getElementById('mode-badge').innerText = sMode;
             
             updateDisplay();
         }
