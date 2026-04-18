@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>프랑스어 퀴즈 - 카테고리 선택형</title>
+    <title>프랑스어 동사 변화 퀴즈 Pro</title>
     <style>
         :root { --primary: #4a90e2; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa; --sidebar-bg: #ffffff; }
         body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* 사이드바 */
         .sidebar { position: fixed; left: -100%; top: 0; width: 300px; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -16,11 +15,9 @@
         #wrong-list-container { flex: 1; overflow-y: auto; padding: 15px; }
         .wrong-item { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 0.9rem; color: #c53030; }
 
-        /* 메인 콘텐츠 */
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 30px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         .quiz-container { background: white; width: 100%; max-width: 480px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
         
-        /* 카테고리 탭 */
         .category-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #eee; padding: 5px; border-radius: 12px; }
         .category-tabs button { flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; background: none; color: #666; cursor: pointer; border: none; }
         .category-tabs button.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; }
@@ -70,13 +67,13 @@
         <div class="quiz-container">
             <div class="category-tabs">
                 <button id="tab-all" class="active" onclick="changeCategory('all')">전체</button>
-                <button id="tab-irregular" onclick="changeCategory('irregular')">불규칙(7개)</button>
-                <button id="tab-group1" onclick="changeCategory('group1')">1군(7개)</button>
+                <button id="tab-irregular" onclick="changeCategory('irregular')">불규칙</button>
+                <button id="tab-group1" onclick="changeCategory('group1')">1군(ER)</button>
             </div>
 
             <div id="mode-badge" style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 8px; font-weight: 700;">NORMAL MODE</div>
             <div class="stats">
-                <div>PROGRESS: <span id="curr-idx">1</span> / <span id="total-idx">84</span></div>
+                <div>PROGRESS: <span id="curr-idx">1</span> / <span id="total-idx">0</span></div>
                 <div>WRONG: <span id="wrong-count">0</span></div>
             </div>
             <div class="question-card" id="q-text">준비 중...</div>
@@ -94,22 +91,40 @@
     </div>
 
     <script>
-        // 데이터에 타입(t) 추가: i=irregular, g=group1
         const rawData = [
+            // 불규칙 동사 (i)
             {v:"être", p:"Je", a:"suis", t:"i"}, {v:"être", p:"Tu", a:"es", t:"i"}, {v:"être", p:"Il", a:"est", t:"i"}, {v:"être", p:"Nous", a:"sommes", t:"i"}, {v:"être", p:"Vous", a:"êtes", t:"i"}, {v:"être", p:"Ils", a:"sont", t:"i"},
-            {v:"aller", p:"Je", a:"vais", t:"i"}, {v:"aller", p:"Tu", a:"vas", t:"i"}, {v:"aller", p:"Elle", a:"va", t:"i"}, {v:"aller", p:"Nous", a:"allons", t:"i"}, {v:"aller", p:"Vous", a:"allez", t:"i"}, {v:"aller", p:"Elles", a:"vont", t:"i"},
+            {v:"avoir", p:"J'", a:"ai", t:"i"}, {v:"avoir", p:"Tu", a:"as", t:"i"}, {v:"avoir", p:"Il", a:"a", t:"i"}, {v:"avoir", p:"Nous", a:"avons", t:"i"}, {v:"avoir", p:"Vous", a:"avez", t:"i"}, {v:"avoir", p:"Ils", a:"ont", t:"i"},
+            {v:"aller", p:"Je", a:"vais", t:"i"}, {v:"aller", p:"Tu", a:"vas", t:"i"}, {v:"aller", p:"Il", a:"va", t:"i"}, {v:"aller", p:"Nous", a:"allons", t:"i"}, {v:"aller", p:"Vous", a:"allez", t:"i"}, {v:"aller", p:"Ils", a:"vont", t:"i"},
             {v:"prendre", p:"Je", a:"prends", t:"i"}, {v:"prendre", p:"Tu", a:"prends", t:"i"}, {v:"prendre", p:"Il", a:"prend", t:"i"}, {v:"prendre", p:"Nous", a:"prenons", t:"i"}, {v:"prendre", p:"Vous", a:"prenez", t:"i"}, {v:"prendre", p:"Ils", a:"prennent", t:"i"},
-            {v:"faire", p:"Je", a:"fais", t:"i"}, {v:"faire", p:"Tu", a:"fais", t:"i"}, {v:"faire", p:"Elle", a:"fait", t:"i"}, {v:"faire", p:"Nous", a:"faisons", t:"i"}, {v:"faire", p:"Vous", a:"faites", t:"i"}, {v:"faire", p:"Elles", a:"font", t:"i"},
+            {v:"apprendre", p:"Je", a:"apprends", t:"i"}, {v:"apprendre", p:"Tu", a:"apprends", t:"i"}, {v:"apprendre", p:"Il", a:"apprend", t:"i"}, {v:"apprendre", p:"Nous", a:"apprenons", t:"i"}, {v:"apprendre", p:"Vous", a:"apprenez", t:"i"}, {v:"apprendre", p:"Ils", a:"apprennent", t:"i"},
+            {v:"faire", p:"Je", a:"fais", t:"i"}, {v:"faire", p:"Tu", a:"fais", t:"i"}, {v:"faire", p:"Il", a:"fait", t:"i"}, {v:"faire", p:"Nous", a:"faisons", t:"i"}, {v:"faire", p:"Vous", a:"faites", t:"i"}, {v:"faire", p:"Ils", a:"font", t:"i"},
             {v:"vouloir", p:"Je", a:"veux", t:"i"}, {v:"vouloir", p:"Tu", a:"veux", t:"i"}, {v:"vouloir", p:"Il", a:"veut", t:"i"}, {v:"vouloir", p:"Nous", a:"voulons", t:"i"}, {v:"vouloir", p:"Vous", a:"voulez", t:"i"}, {v:"vouloir", p:"Ils", a:"veulent", t:"i"},
-            {v:"pouvoir", p:"Je", a:"peux", t:"i"}, {v:"pouvoir", p:"Tu", a:"peux", t:"i"}, {v:"pouvoir", p:"Elle", a:"peut", t:"i"}, {v:"pouvoir", p:"Nous", a:"pouvons", t:"i"}, {v:"pouvoir", p:"Vous", a:"pouvez", t:"i"}, {v:"pouvoir", p:"Elles", a:"peuvent", t:"i"},
+            {v:"pouvoir", p:"Je", a:"peux", t:"i"}, {v:"pouvoir", p:"Tu", a:"peux", t:"i"}, {v:"pouvoir", p:"Il", a:"peut", t:"i"}, {v:"pouvoir", p:"Nous", a:"pouvons", t:"i"}, {v:"pouvoir", p:"Vous", a:"pouvez", t:"i"}, {v:"pouvoir", p:"Ils", a:"peuvent", t:"i"},
             {v:"savoir", p:"Je", a:"sais", t:"i"}, {v:"savoir", p:"Tu", a:"sais", t:"i"}, {v:"savoir", p:"Il", a:"sait", t:"i"}, {v:"savoir", p:"Nous", a:"savons", t:"i"}, {v:"savoir", p:"Vous", a:"savez", t:"i"}, {v:"savoir", p:"Ils", a:"savent", t:"i"},
-            {v:"aimer", p:"J'", a:"aime", t:"g"}, {v:"aimer", p:"Tu", a:"aimes", t:"g"}, {v:"aimer", p:"Elle", a:"aime", t:"g"}, {v:"aimer", p:"Nous", a:"aimons", t:"g"}, {v:"aimer", p:"Vous", a:"aimez", t:"g"}, {v:"aimer", p:"Ils", a:"aiment", t:"g"},
-            {v:"habiter", p:"J'", a:"habite", t:"g"}, {v:"habiter", p:"Tu", a:"habites", t:"g"}, {v:"habiter", p:"Il", a:"habite", t:"g"}, {v:"habiter", p:"Nous", a:"habitons", t:"g"}, {v:"habiter", p:"Vous", a:"habitez", t:"g"}, {v:"habiter", p:"Elles", a:"habitent", t:"g"},
-            {v:"travailler", p:"Je", a:"travaille", t:"g"}, {v:"travailler", p:"Tu", a:"travailles", t:"g"}, {v:"travailler", p:"Elle", a:"travaille", t:"g"}, {v:"travailler", p:"Nous", a:"travaillons", t:"g"}, {v:"travailler", p:"Vous", a:"travaillez", t:"g"}, {v:"travailler", p:"Ils", a:"travaillent", t:"g"},
-            {v:"rencontrer", p:"Je", a:"rencontre", t:"g"}, {v:"rencontrer", p:"Tu", a:"rencontres", t:"g"}, {v:"rencontrer", p:"Il", a:"rencontre", t:"g"}, {v:"rencontrer", p:"Nous", a:"rencontrons", t:"g"}, {v:"rencontrer", p:"Vous", a:"rencontrez", t:"g"}, {v:"rencontrer", p:"Elles", a:"rencontrent", t:"g"},
-            {v:"arriver", p:"J'", a:"arrive", t:"g"}, {v:"arriver", p:"Tu", a:"arrives", t:"g"}, {v:"arriver", p:"Elle", a:"arrive", t:"g"}, {v:"arriver", p:"Nous", a:"arrivons", t:"g"}, {v:"arriver", p:"Vous", a:"arrivez", t:"g"}, {v:"arriver", p:"Ils", a:"arrivent", t:"g"},
-            {v:"parler", p:"Je", a:"parle", t:"g"}, {v:"parler", p:"Tu", a:"parles", t:"g"}, {v:"parler", p:"Il", a:"parle", t:"g"}, {v:"parler", p:"Nous", a:"parlons", t:"g"}, {v:"parler", p:"Vous", a:"parlez", t:"g"}, {v:"parler", p:"Elles", a:"parlent", t:"g"},
-            {v:"appeler", p:"J'", a:"appelle", t:"g"}, {v:"appeler", p:"Tu", a:"appelles", t:"g"}, {v:"appeler", p:"Elle", a:"appelle", t:"g"}, {v:"appeler", p:"Nous", a:"appelons", t:"g"}, {v:"appeler", p:"Vous", a:"appelez", t:"g"}, {v:"appeler", p:"Ils", a:"appellent", t:"g"}
+            {v:"venir", p:"Je", a:"viens", t:"i"}, {v:"venir", p:"Tu", a:"viens", t:"i"}, {v:"venir", p:"Il", a:"vient", t:"i"}, {v:"venir", p:"Nous", a:"venons", t:"i"}, {v:"venir", p:"Vous", a:"venez", t:"i"}, {v:"venir", p:"Ils", a:"viennent", t:"i"},
+            {v:"devenir", p:"Je", a:"deviens", t:"i"}, {v:"devenir", p:"Tu", a:"deviens", t:"i"}, {v:"devenir", p:"Il", a:"devient", t:"i"}, {v:"devenir", p:"Nous", a:"devenons", t:"i"}, {v:"devenir", p:"Vous", a:"devenez", t:"i"}, {v:"devenir", p:"Ils", a:"deviennent", t:"i"},
+            {v:"partir", p:"Je", a:"pars", t:"i"}, {v:"partir", p:"Tu", a:"pars", t:"i"}, {v:"partir", p:"Il", a:"part", t:"i"}, {v:"partir", p:"Nous", a:"partons", t:"i"}, {v:"partir", p:"Vous", a:"partez", t:"i"}, {v:"partir", p:"Ils", a:"partent", t:"i"},
+            {v:"sortir", p:"Je", a:"sors", t:"i"}, {v:"sortir", p:"Tu", a:"sors", t:"i"}, {v:"sortir", p:"Il", a:"sort", t:"i"}, {v:"sortir", p:"Nous", a:"sortons", t:"i"}, {v:"sortir", p:"Vous", a:"sortez", t:"i"}, {v:"sortir", p:"Ils", a:"sortent", t:"i"},
+            {v:"voir", p:"Je", a:"vois", t:"i"}, {v:"voir", p:"Tu", a:"vois", t:"i"}, {v:"voir", p:"Il", a:"voit", t:"i"}, {v:"voir", p:"Nous", a:"voyons", t:"i"}, {v:"voir", p:"Vous", a:"voyez", t:"i"}, {v:"voir", p:"Ils", a:"voient", t:"i"},
+
+            // 1군 동사 (g)
+            {v:"aimer", p:"J'", a:"aime", t:"g"}, {v:"aimer", p:"Tu", a:"aimes", t:"g"}, {v:"aimer", p:"Il", a:"aime", t:"g"}, {v:"aimer", p:"Nous", a:"aimons", t:"g"}, {v:"aimer", p:"Vous", a:"aimez", t:"g"}, {v:"aimer", p:"Ils", a:"aiment", t:"g"},
+            {v:"habiter", p:"J'", a:"habite", t:"g"}, {v:"habiter", p:"Tu", a:"habites", t:"g"}, {v:"habiter", p:"Il", a:"habite", t:"g"}, {v:"habiter", p:"Nous", a:"habitons", t:"g"}, {v:"habiter", p:"Vous", a:"habitez", t:"g"}, {v:"habiter", p:"Ils", a:"habitent", t:"g"},
+            {v:"travailler", p:"Je", a:"travaille", t:"g"}, {v:"travailler", p:"Tu", a:"travailles", t:"g"}, {v:"travailler", p:"Il", a:"travaille", t:"g"}, {v:"travailler", p:"Nous", a:"travaillons", t:"g"}, {v:"travailler", p:"Vous", a:"travaillez", t:"g"}, {v:"travailler", p:"Ils", a:"travaillent", t:"g"},
+            {v:"rencontrer", p:"Je", a:"rencontre", t:"g"}, {v:"rencontrer", p:"Tu", a:"rencontres", t:"g"}, {v:"rencontrer", p:"Il", a:"rencontre", t:"g"}, {v:"rencontrer", p:"Nous", a:"rencontrons", t:"g"}, {v:"rencontrer", p:"Vous", a:"rencontrez", t:"g"}, {v:"rencontrer", p:"Ils", a:"rencontrent", t:"g"},
+            {v:"arriver", p:"J'", a:"arrive", t:"g"}, {v:"arriver", p:"Tu", a:"arrives", t:"g"}, {v:"arriver", p:"Il", a:"arrive", t:"g"}, {v:"arriver", p:"Nous", a:"arrivons", t:"g"}, {v:"arriver", p:"Vous", a:"arrivez", t:"g"}, {v:"arriver", p:"Ils", a:"arrivent", t:"g"},
+            {v:"parler", p:"Je", a:"parle", t:"g"}, {v:"parler", p:"Tu", a:"parles", t:"g"}, {v:"parler", p:"Il", a:"parle", t:"g"}, {v:"parler", p:"Nous", a:"parlons", t:"g"}, {v:"parler", p:"Vous", a:"parlez", t:"g"}, {v:"parler", p:"Ils", a:"parlent", t:"g"},
+            {v:"appeler", p:"J'", a:"appelle", t:"g"}, {v:"appeler", p:"Tu", a:"appelles", t:"g"}, {v:"appeler", p:"Il", a:"appelle", t:"g"}, {v:"appeler", p:"Nous", a:"appelons", t:"g"}, {v:"appeler", p:"Vous", a:"appelez", t:"g"}, {v:"appeler", p:"Ils", a:"appellent", t:"g"},
+            {v:"s'appeler", p:"Je", a:"m'appelle", t:"g"}, {v:"s'appeler", p:"Tu", a:"t'appelles", t:"g"}, {v:"s'appeler", p:"Il", a:"s'appelle", t:"g"}, {v:"s'appeler", p:"Nous", a:"nous appelons", t:"g"}, {v:"s'appeler", p:"Vous", a:"vous appelez", t:"g"}, {v:"s'appeler", p:"Ils", a:"s'appellent", t:"g"},
+            {v:"préférer", p:"Je", a:"préfère", t:"g"}, {v:"préférer", p:"Tu", a:"préfères", t:"g"}, {v:"préférer", p:"Il", a:"préfère", t:"g"}, {v:"préférer", p:"Nous", a:"préférons", t:"g"}, {v:"préférer", p:"Vous", a:"préférez", t:"g"}, {v:"préférer", p:"Ils", a:"préfèrent", t:"g"},
+            {v:"exagérer", p:"Je", a:"exagère", t:"g"}, {v:"exagérer", p:"Tu", a:"exagères", t:"g"}, {v:"exagérer", p:"Il", a:"exagère", t:"g"}, {v:"exagérer", p:"Nous", a:"exagérons", t:"g"}, {v:"exagérer", p:"Vous", a:"exagérez", t:"g"}, {v:"exagérer", p:"Ils", a:"exagèrent", t:"g"},
+            {v:"manger", p:"Je", a:"mange", t:"g"}, {v:"manger", p:"Tu", a:"manges", t:"g"}, {v:"manger", p:"Il", a:"mange", t:"g"}, {v:"manger", p:"Nous", a:"mangeons", t:"g"}, {v:"manger", p:"Vous", a:"mangez", t:"g"}, {v:"manger", p:"Ils", a:"mangent", t:"g"},
+            {v:"commencer", p:"Je", a:"commence", t:"g"}, {v:"commencer", p:"Tu", a:"commences", t:"g"}, {v:"commencer", p:"Il", a:"commence", t:"g"}, {v:"commencer", p:"Nous", a:"commençons", t:"g"}, {v:"commencer", p:"Vous", a:"commencez", t:"g"}, {v:"commencer", p:"Ils", a:"commencent", t:"g"},
+            {v:"acheter", p:"J'", a:"achète", t:"g"}, {v:"acheter", p:"Tu", a:"achètes", t:"g"}, {v:"acheter", p:"Il", a:"achète", t:"g"}, {v:"acheter", p:"Nous", a:"achetons", t:"g"}, {v:"acheter", p:"Vous", a:"achetez", t:"g"}, {v:"acheter", p:"Ils", a:"achètent", t:"g"},
+            {v:"passer", p:"Je", a:"passe", t:"g"}, {v:"nager", p:"Je", a:"nage", t:"g"}, {v:"chercher", p:"Je", a:"cherche", t:"g"}, {v:"retourner", p:"Je", a:"retourne", t:"g"}, {v:"rester", p:"Je", a:"reste", t:"g"}, {v:"visiter", p:"Je", a:"visite", t:"g"},
+            {v:"voyager", p:"Je", a:"voyage", t:"g"}, {v:"penser", p:"Je", a:"pense", t:"g"}, {v:"commander", p:"Je", a:"commande", t:"g"}, {v:"fumer", p:"Je", a:"fume", t:"g"}, {v:"regarder", p:"Je", a:"regarde", t:"g"}, {v:"désirer", p:"Je", a:"désire", t:"g"},
+            {v:"frapper", p:"Je", a:"frappe", t:"g"}, {v:"dî너", p:"Je", a:"dîne", t:"g"}, {v:"déjeuner", p:"Je", a:"déjeune", t:"g"}
         ];
 
         let currentList = [...rawData];
@@ -117,16 +132,20 @@
         let idx = 0;
         let currentCategory = 'all';
 
+        function initTabs() {
+            const countI = rawData.filter(d => d.t === 'i').length;
+            const countG = rawData.filter(d => d.t === 'g').length;
+            document.getElementById('tab-irregular').innerText = `불규칙(${countI})`;
+            document.getElementById('tab-group1').innerText = `1군(${countG})`;
+        }
+
         function changeCategory(cat) {
             currentCategory = cat;
             idx = 0;
             wrongIndices = [];
-            
-            // 탭 활성화 UI 처리
             document.querySelectorAll('.category-tabs button').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${cat}`).classList.add('active');
 
-            // 필터링
             if (cat === 'all') currentList = [...rawData];
             else if (cat === 'irregular') currentList = rawData.filter(d => d.t === 'i');
             else if (cat === 'group1') currentList = rawData.filter(d => d.t === 'g');
@@ -152,11 +171,8 @@
                 inputField.value = "";
                 inputField.focus();
             } else {
-                qCard.innerText = "카테고리 학습 완료! 🎉";
-                document.getElementById('curr-idx').innerText = currentList.length;
-                document.getElementById('total-idx').innerText = currentList.length;
+                qCard.innerText = "학습 완료! 🎉";
                 if (wrongIndices.length > 0) document.getElementById('review-btn').style.display = "block";
-                inputField.value = "";
             }
             updateWrongSidebar();
             save();
@@ -191,21 +207,16 @@
                 msg.style.color = "var(--error)";
                 const currentItem = currentList[idx];
                 const originalIdx = rawData.findIndex(item => item.v === currentItem.v && item.p === currentItem.p && item.a === currentItem.a);
-                
-                if (!wrongIndices.includes(originalIdx)) {
-                    wrongIndices.push(originalIdx);
-                }
+                if (!wrongIndices.includes(originalIdx)) wrongIndices.push(originalIdx);
                 updateWrongSidebar();
                 save();
             }
         }
 
         function shuffleAndStart() {
-            if(confirm("현재 범위를 랜덤하게 섞고 다시 시작할까요?")) {
+            if(confirm("현재 범위를 랜덤하게 섞을까요?")) {
                 currentList.sort(() => Math.random() - 0.5);
                 idx = 0; wrongIndices = [];
-                document.getElementById('mode-badge').innerText = "RANDOM " + currentCategory.toUpperCase();
-                document.getElementById('review-btn').style.display = "none";
                 updateDisplay();
             }
         }
@@ -219,10 +230,7 @@
         }
 
         function resetAll() {
-            if(confirm("모든 데이터를 지우고 전체 모드로 돌아갈까요?")) {
-                localStorage.clear();
-                location.reload();
-            }
+            if(confirm("초기화하시겠습니까?")) { localStorage.clear(); location.reload(); }
         }
 
         function save() {
@@ -233,20 +241,15 @@
         }
 
         function load() {
+            initTabs();
             const sIdx = localStorage.getItem('vCat_idx');
             const sList = localStorage.getItem('vCat_list');
             const sWrong = localStorage.getItem('vCat_wrong');
             const sCat = localStorage.getItem('vCat_cat');
-            
-            if (sCat) {
-                currentCategory = sCat;
-                document.querySelectorAll('.category-tabs button').forEach(b => b.classList.remove('active'));
-                document.getElementById(`tab-${sCat}`).classList.add('active');
-            }
+            if (sCat) changeCategory(sCat);
             if (sList) currentList = JSON.parse(sList);
             if (sIdx) idx = parseInt(sIdx);
             if (sWrong) wrongIndices = JSON.parse(sWrong);
-            
             updateDisplay();
         }
 
