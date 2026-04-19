@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>프랑스어 종합 문법 퀴즈</title>
+    <title>프랑스어 종합 퀴즈 Pro</title>
     <style>
         :root { --primary: #4a90e2; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa; --sidebar-bg: #ffffff; }
         body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* 사이드바 */
         .sidebar { position: fixed; left: -100%; top: 0; width: 300px; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; background: #34495e; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -16,48 +15,51 @@
         #wrong-list-container { flex: 1; overflow-y: auto; padding: 15px; }
         .wrong-item { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 0.9rem; color: #c53030; }
 
-        /* 메인 콘텐츠 */
-        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 20px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
-        .quiz-container { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 30px 15px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .quiz-container { background: white; width: 100%; max-width: 480px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); text-align: center; box-sizing: border-box; }
         
-        /* 카테고리 탭 (스크롤 가능) */
-        .category-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #eee; padding: 8px; border-radius: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-        .category-tabs::-webkit-scrollbar { display: none; }
-        .category-tabs button { flex: 0 0 auto; padding: 10px 15px; font-size: 0.8rem; border-radius: 8px; background: none; color: #666; cursor: pointer; border: none; }
+        .category-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #eee; padding: 5px; border-radius: 12px; flex-wrap: wrap; }
+        .category-tabs button { flex: 1 1 auto; padding: 8px 12px; font-size: 0.7rem; border-radius: 8px; background: none; color: #666; cursor: pointer; border: none; min-width: 60px; }
         .category-tabs button.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; }
 
-        .stats { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
-        .question-card { background: #f8fafc; padding: 35px 15px; border-radius: 20px; margin-bottom: 20px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #f1f5f9; }
-        .q-main { font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
-        .q-hint { font-size: 0.9rem; color: #64748b; font-weight: 500; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
+        .question-card { background: #f8fafc; padding: 40px 20px; border-radius: 20px; margin-bottom: 25px; font-size: 1.4rem; font-weight: 800; color: #1e293b; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9; line-height: 1.4; }
         
         input { width: 100%; padding: 16px; font-size: 18px; border: 2px solid #e2e8f0; border-radius: 14px; outline: none; text-align: center; box-sizing: border-box; }
         input:focus { border-color: var(--primary); background: #fcfdff; }
         
-        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
         button { width: 100%; padding: 14px; font-size: 0.95rem; cursor: pointer; border: none; border-radius: 14px; background: var(--primary); color: white; font-weight: bold; transition: 0.2s; }
         button:active { transform: scale(0.98); opacity: 0.9; }
         
-        #check-btn { background: #1e293b; font-size: 1.1rem; padding: 16px; }
+        #check-btn { background: #1e293b; font-size: 1.1rem; padding: 18px; }
+        #shuffle-btn { background: #6c5ce7; }
+        #view-wrong-btn { background: #ff7675; }
         #review-btn { background: #f39c12; display: none; }
-        #reset-btn { background: #94a3b8; }
+        #reset-btn { background: #94a3b8; margin-top: 5px; }
         
         #msg { margin-top: 15px; font-weight: bold; min-height: 24px; font-size: 1rem; }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
             body { flex-direction: row; }
-            .sidebar { position: relative; left: 0; width: 350px; box-shadow: none; border-right: 1px solid #e2e8f0; }
+            .sidebar { position: relative; left: 0; width: 320px; box-shadow: none; border-right: 1px solid #e2e8f0; }
             .sidebar-header { justify-content: center; }
             .close-sidebar { display: none; }
+            #view-wrong-btn { display: none; }
         }
+
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
         .overlay.active { display: block; }
     </style>
 </head>
 <body>
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header"><span>❌ 오답 리스트</span><span class="close-sidebar" onclick="toggleSidebar()">✕</span></div>
+        <div class="sidebar-header">
+            <span>❌ 오답 리스트</span>
+            <span class="close-sidebar" onclick="toggleSidebar()">✕</span>
+        </div>
         <div id="wrong-list-container"></div>
     </div>
 
@@ -65,11 +67,12 @@
         <div class="quiz-container">
             <div class="category-tabs">
                 <button id="tab-all" class="active" onclick="changeCategory('all')">전체</button>
-                <button id="tab-v" onclick="changeCategory('v')">동사</button>
-                <button id="tab-dp" onclick="changeCategory('dp')">강세형</button>
-                <button id="tab-pa" onclick="changeCategory('pa')">소유한정사</button>
-                <button id="tab-da" onclick="changeCategory('da')">지시한정사</button>
-                <button id="tab-pt" onclick="changeCategory('pt')">부분관사</button>
+                <button id="tab-irregular" onclick="changeCategory('irregular')">불규칙</button>
+                <button id="tab-group1" onclick="changeCategory('group1')">1군</button>
+                <button id="tab-strong" onclick="changeCategory('strong')">강세형</button>
+                <button id="tab-poss" onclick="changeCategory('poss')">소유</button>
+                <button id="tab-demo" onclick="changeCategory('demo')">지시</button>
+                <button id="tab-part" onclick="changeCategory('part')">부분</button>
             </div>
 
             <div id="mode-badge" style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 8px; font-weight: 700;">NORMAL MODE</div>
@@ -77,16 +80,15 @@
                 <div>PROGRESS: <span id="curr-idx">1</span> / <span id="total-idx">0</span></div>
                 <div>WRONG: <span id="wrong-count">0</span></div>
             </div>
-            <div class="question-card">
-                <div class="q-main" id="q-main">준비 중...</div>
-                <div class="q-hint" id="q-hint"></div>
-            </div>
-            <input type="text" id="user-input" placeholder="정답 입력" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <div class="question-card" id="q-text">준비 중...</div>
+            <input type="text" id="user-input" placeholder="정답을 입력하세요" autocomplete="off" autocapitalize="off" spellcheck="false">
             
             <div class="btn-group">
                 <button id="check-btn" onclick="check()">확인 (ENTER)</button>
-                <button id="review-btn" onclick="startReview()">오답 복습하기</button>
-                <button id="reset-btn" onclick="resetAll()">초기화</button>
+                <button id="shuffle-btn" onclick="shuffleAndStart()">순서 섞기</button>
+                <button id="view-wrong-btn" onclick="toggleSidebar()">오답 확인하기</button>
+                <button id="review-btn" onclick="startReview()">오답만 복습하기</button>
+                <button id="reset-btn" onclick="resetAll()">전체 초기화</button>
             </div>
             <div id="msg"></div>
         </div>
@@ -94,29 +96,67 @@
 
     <script>
         const rawData = [
-            // 강세형 대명사 (dp)
-            {q:"je", h:"강세형 대명사", a:"moi", t:"dp"}, {q:"tu", h:"강세형 대명사", a:"toi", t:"dp"}, {q:"il", h:"강세형 대명사", a:"lui", t:"dp"}, {q:"elle", h:"강세형 대명사", a:"elle", t:"dp"},
-            {q:"nous", h:"강세형 대명사", a:"nous", t:"dp"}, {q:"vous", h:"강세형 대명사", a:"vous", t:"dp"}, {q:"ils", h:"강세형 대명사", a:"eux", t:"dp"}, {q:"elles", h:"강세형 대명사", a:"elles", t:"dp"},
-            
-            // 소유한정사 (pa) - 모음 규칙 포함
-            {q:"livre (m)", h:"나의 (소유)", a:"mon", t:"pa"}, {q:"table (f)", h:"나의 (소유)", a:"ma", t:"pa"}, {q:"amie (f/모음)", h:"나의 (소유)", a:"mon", t:"pa"},
-            {q:"école (f/모음)", h:"너의 (소유)", a:"ton", t:"pa"}, {q:"ordinateur (m)", h:"그의 (소유)", a:"son", t:"pa"}, {q:"idées (pl)", h:"그녀의 (소유)", a:"ses", t:"pa"},
-            {q:"maison", h:"우리들의 (소유)", a:"notre", t:"pa"}, {q:"parents", h:"우리들의 (소유)", a:"nos", t:"pa"}, {q:"voiture", h:"당신들의 (소유)", a:"votre", t:"pa"},
-            
-            // 지시한정사 (da)
-            {q:"garçon (m)", h:"이/그 (지시)", a:"ce", t:"da"}, {q:"homme (h무음)", h:"이/그 (지시)", a:"cet", t:"da"}, {q:"amie (f)", h:"이/그 (지시)", a:"cette", t:"da"}, {q:"enfants (pl)", h:"이/저 (지시)", a:"ces", t:"da"},
-            
-            // 부분관사 (pt)
-            {q:"pain (m)", h:"약간의 (부분관사)", a:"du", t:"pt"}, {q:"viande (f)", h:"약간의 (부분관사)", a:"de la", t:"pt"}, {q:"eau (모음)", h:"약간의 (부분관사)", a:"de l'", t:"pt"}, {q:"pâtes (pl)", h:"약간의 (부분관사)", a:"des", t:"pt"},
-            
-            // 기존 동사 일부 (v)
-            {q:"Je (être)", h:"동사 변화", a:"suis", t:"v"}, {q:"Tu (avoir)", h:"동사 변화", a:"as", t:"v"}, {q:"Nous (aller)", h:"동사 변화", a:"allons", t:"v"}
+            // [i] 불규칙 동사 보존
+            {v:"être", p:"Je", a:"suis", t:"i"}, {v:"être", p:"Tu", a:"es", t:"i"}, {v:"être", p:"Il", a:"est", t:"i"}, {v:"être", p:"Nous", a:"sommes", t:"i"}, {v:"être", p:"Vous", a:"êtes", t:"i"}, {v:"être", p:"Ils", a:"sont", t:"i"},
+            {v:"avoir", p:"J'", a:"ai", t:"i"}, {v:"avoir", p:"Tu", a:"as", t:"i"}, {v:"avoir", p:"Il", a:"a", t:"i"}, {v:"avoir", p:"Nous", a:"avons", t:"i"}, {v:"avoir", p:"Vous", a:"avez", t:"i"}, {v:"avoir", p:"Ils", a:"ont", t:"i"},
+            {v:"aller", p:"Je", a:"vais", t:"i"}, {v:"aller", p:"Tu", a:"vas", t:"i"}, {v:"aller", p:"Il", a:"va", t:"i"}, {v:"aller", p:"Nous", a:"allons", t:"i"}, {v:"aller", p:"Vous", a:"allez", t:"i"}, {v:"aller", p:"Ils", a:"vont", t:"i"},
+            {v:"prendre", p:"Je", a:"prends", t:"i"}, {v:"prendre", p:"Tu", a:"prends", t:"i"}, {v:"prendre", p:"Il", a:"prend", t:"i"}, {v:"prendre", p:"Nous", a:"prenons", t:"i"}, {v:"prendre", p:"Vous", a:"prenez", t:"i"}, {v:"prendre", p:"Ils", a:"prennent", t:"i"},
+            {v:"faire", p:"Je", a:"fais", t:"i"}, {v:"faire", p:"Tu", a:"fais", t:"i"}, {v:"faire", p:"Il", a:"fait", t:"i"}, {v:"faire", p:"Nous", a:"faisons", t:"i"}, {v:"faire", p:"Vous", a:"faites", t:"i"}, {v:"faire", p:"Ils", a:"font", t:"i"},
+            {v:"vouloir", p:"Je", a:"veux", t:"i"}, {v:"vouloir", p:"Nous", a:"voulons", t:"i"}, {v:"vouloir", p:"Ils", a:"veulent", t:"i"},
+            {v:"pouvoir", p:"Je", a:"peux", t:"i"}, {v:"pouvoir", p:"Nous", a:"pouvons", t:"i"}, {v:"pouvoir", p:"Ils", a:"peuvent", t:"i"},
+            {v:"savoir", p:"Je", a:"sais", t:"i"}, {v:"savoir", p:"Nous", a:"savons", t:"i"}, {v:"savoir", p:"Ils", a:"savent", t:"i"},
+            {v:"venir", p:"Je", a:"viens", t:"i"}, {v:"venir", p:"Nous", a:"venons", t:"i"}, {v:"venir", p:"Ils", a:"viennent", t:"i"},
+            {v:"partir", p:"Je", a:"pars", t:"i"}, {v:"partir", p:"Nous", a:"partons", t:"i"},
+            {v:"voir", p:"Je", a:"vois", t:"i"}, {v:"voir", p:"Nous", a:"voyons", t:"i"}, {v:"voir", p:"Ils", a:"voient", t:"i"},
+
+            // [g] 1군 동사 보존
+            {v:"aimer", p:"J'", a:"aime", t:"g"}, {v:"aimer", p:"Nous", a:"aimons", t:"g"},
+            {v:"habiter", p:"J'", a:"habite", t:"g"}, {v:"habiter", p:"Nous", a:"habitons", t:"g"},
+            {v:"travailler", p:"Je", a:"travaille", t:"g"}, {v:"travailler", p:"Nous", a:"travaillons", t:"g"},
+            {v:"appeler", p:"J'", a:"appelle", t:"g"}, {v:"appeler", p:"Nous", a:"appelons", t:"g"},
+            {v:"s'appeler", p:"Je", a:"m'appelle", t:"g"}, {v:"s'appeler", p:"Nous", a:"nous appelons", t:"g"},
+            {v:"manger", p:"Je", a:"mange", t:"g"}, {v:"manger", p:"Nous", a:"mangeons", t:"g"},
+            {v:"dî너", p:"Je", a:"dîne", t:"g"},
+
+            // [strong] 강세형
+            {v:"강세형", p:"je", a:"moi", t:"strong"}, {v:"강세형", p:"tu", a:"toi", t:"strong"}, {v:"강세형", p:"il", a:"lui", t:"strong"}, {v:"강세형", p:"elle", a:"elle", t:"strong"},
+            {v:"강세형", p:"nous", a:"nous", t:"strong"}, {v:"강세형", p:"vous", a:"vous", t:"strong"}, {v:"강세형", p:"ils", a:"eux", t:"strong"}, {v:"강세형", p:"elles", a:"elles", t:"strong"},
+
+            // [poss] 소유한정사 (24개 세트)
+            // 나의 (My)
+            {v:"livre", p:"나의", a:"mon", t:"poss"}, {v:"voiture", p:"나의", a:"ma", t:"poss"}, {v:"amie", p:"나의", a:"mon", t:"poss"}, {v:"livres", p:"나의", a:"mes", t:"poss"},
+            // 너의 (Your - sg)
+            {v:"livre", p:"너의", a:"ton", t:"poss"}, {v:"voiture", p:"너의", a:"ta", t:"poss"}, {v:"amie", p:"너의", a:"ton", t:"poss"}, {v:"livres", p:"너의", a:"tes", t:"poss"},
+            // 그의/그녀의 (His/Her)
+            {v:"livre", p:"그/그녀의", a:"son", t:"poss"}, {v:"voiture", p:"그/그녀의", a:"sa", t:"poss"}, {v:"amie", p:"그/그녀의", a:"son", t:"poss"}, {v:"livres", p:"그/그녀의", a:"ses", t:"poss"},
+            // 우리들의 (Our)
+            {v:"livre", p:"우리들의", a:"notre", t:"poss"}, {v:"voiture", p:"우리들의", a:"notre", t:"poss"}, {v:"amie", p:"우리들의", a:"notre", t:"poss"}, {v:"livres", p:"우리들의", a:"nos", t:"poss"},
+            // 당신들의 (Your - pl)
+            {v:"livre", p:"당신들의", a:"votre", t:"poss"}, {v:"voiture", p:"당신들의", a:"votre", t:"poss"}, {v:"amie", p:"당신들의", a:"votre", t:"poss"}, {v:"livres", p:"당신들의", a:"vos", t:"poss"},
+            // 그들의 (Their)
+            {v:"livre", p:"그들의", a:"leur", t:"poss"}, {v:"voiture", p:"그들의", a:"leur", t:"poss"}, {v:"amie", p:"그들의", a:"leur", t:"poss"}, {v:"livres", p:"그들의", a:"leurs", t:"poss"},
+
+            // [demo] 지시
+            {v:"livre(m)", p:"이/그", a:"ce", t:"demo"}, {v:"amie(f)", p:"이/그", a:"cette", t:"demo"}, {v:"homme(m/h무음)", p:"이/그", a:"cet", t:"demo"}, {v:"livres(pl)", p:"이/그", a:"ces", t:"demo"},
+
+            // [part] 부분
+            {v:"pain(m)", p:"약간의", a:"du", t:"part"}, {v:"viande(f)", p:"약간의", a:"de la", t:"part"}, {v:"eau(f/모음)", p:"약간의", a:"de l'", t:"part"}, {v:"pommes(pl)", p:"약간의", a:"des", t:"part"}
         ];
 
         let currentList = [...rawData];
         let wrongIndices = [];
         let idx = 0;
         let currentCategory = 'all';
+
+        function initTabs() {
+            const getCount = (tag) => rawData.filter(d => d.t === tag).length;
+            document.getElementById('tab-irregular').innerText = `불규칙(${getCount('i')})`;
+            document.getElementById('tab-group1').innerText = `1군(${getCount('g')})`;
+            document.getElementById('tab-strong').innerText = `강세형(${getCount('strong')})`;
+            document.getElementById('tab-poss').innerText = `소유(${getCount('poss')})`;
+            document.getElementById('tab-demo').innerText = `지시(${getCount('demo')})`;
+            document.getElementById('tab-part').innerText = `부분(${getCount('part')})`;
+        }
 
         function changeCategory(cat) {
             currentCategory = cat;
@@ -126,31 +166,59 @@
             document.getElementById(`tab-${cat}`).classList.add('active');
 
             if (cat === 'all') currentList = [...rawData];
-            else currentList = rawData.filter(d => d.t === cat);
+            else if (cat === 'irregular') currentList = rawData.filter(d => d.t === 'i');
+            else if (cat === 'group1') currentList = rawData.filter(d => d.t === 'g');
+            else if (cat === 'strong') currentList = rawData.filter(d => d.t === 'strong');
+            else if (cat === 'poss') currentList = rawData.filter(d => d.t === 'poss');
+            else if (cat === 'demo') currentList = rawData.filter(d => d.t === 'demo');
+            else if (cat === 'part') currentList = rawData.filter(d => d.t === 'part');
 
             document.getElementById('mode-badge').innerText = `${cat.toUpperCase()} MODE`;
             updateDisplay();
         }
 
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
         function updateDisplay() {
-            const qMain = document.getElementById('q-main');
-            const qHint = document.getElementById('q-hint');
+            const qCard = document.getElementById('q-text');
             const inputField = document.getElementById('user-input');
 
             if (idx < currentList.length) {
                 const item = currentList[idx];
-                qMain.innerText = item.q;
-                qHint.innerText = item.h;
+                if (item.t === 'i' || item.t === 'g') {
+                    qCard.innerText = `${item.p} (${item.v}) _______`;
+                } else if (item.t === 'poss') {
+                    qCard.innerText = `${item.p} [${item.v}] _______`;
+                } else {
+                    qCard.innerText = `${item.p} [${item.v}] _______`;
+                }
+                
                 document.getElementById('curr-idx').innerText = idx + 1;
                 document.getElementById('total-idx').innerText = currentList.length;
                 inputField.value = "";
                 inputField.focus();
             } else {
-                qMain.innerText = "카테고리 학습 완료! 🎉";
-                qHint.innerText = "";
+                qCard.innerText = "학습 완료! 🎉";
                 if (wrongIndices.length > 0) document.getElementById('review-btn').style.display = "block";
             }
             updateWrongSidebar();
+            save();
+        }
+
+        function updateWrongSidebar() {
+            const container = document.getElementById('wrong-list-container');
+            container.innerHTML = "";
+            wrongIndices.forEach(originalIdx => {
+                const item = rawData[originalIdx];
+                const div = document.createElement('div');
+                div.className = "wrong-item";
+                div.innerHTML = `<b>${item.p}</b> [${item.v}]<br>정답: <b>${item.a}</b>`;
+                container.appendChild(div);
+            });
+            document.getElementById('wrong-count').innerText = wrongIndices.length;
         }
 
         function check() {
@@ -168,28 +236,19 @@
                 msg.innerText = `오답! 정답: [ ${answer} ]`;
                 msg.style.color = "var(--error)";
                 const currentItem = currentList[idx];
-                const originalIdx = rawData.findIndex(item => item.q === currentItem.q && item.a === currentItem.a);
+                const originalIdx = rawData.findIndex(item => item.v === currentItem.v && item.p === currentItem.p && item.a === currentItem.a);
                 if (!wrongIndices.includes(originalIdx)) wrongIndices.push(originalIdx);
                 updateWrongSidebar();
+                save();
             }
         }
 
-        function updateWrongSidebar() {
-            const container = document.getElementById('wrong-list-container');
-            container.innerHTML = "";
-            wrongIndices.forEach(oIdx => {
-                const item = rawData[oIdx];
-                const div = document.createElement('div');
-                div.className = "wrong-item";
-                div.innerHTML = `[${item.h}] <b>${item.q}</b> <br>정답: <b>${item.a}</b>`;
-                container.appendChild(div);
-            });
-            document.getElementById('wrong-count').innerText = wrongIndices.length;
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
+        function shuffleAndStart() {
+            if(confirm("현재 범위를 랜덤하게 섞을까요?")) {
+                currentList.sort(() => Math.random() - 0.5);
+                idx = 0; wrongIndices = [];
+                updateDisplay();
+            }
         }
 
         function startReview() {
@@ -200,10 +259,32 @@
             updateDisplay();
         }
 
-        function resetAll() { location.reload(); }
+        function resetAll() {
+            if(confirm("초기화하시겠습니까?")) { localStorage.clear(); location.reload(); }
+        }
+
+        function save() {
+            localStorage.setItem('vCat_idx', idx);
+            localStorage.setItem('vCat_list', JSON.stringify(currentList));
+            localStorage.setItem('vCat_wrong', JSON.stringify(wrongIndices));
+            localStorage.setItem('vCat_cat', currentCategory);
+        }
+
+        function load() {
+            initTabs();
+            const sIdx = localStorage.getItem('vCat_idx');
+            const sList = localStorage.getItem('vCat_list');
+            const sWrong = localStorage.getItem('vCat_wrong');
+            const sCat = localStorage.getItem('vCat_cat');
+            if (sCat) changeCategory(sCat);
+            if (sList) currentList = JSON.parse(sList);
+            if (sIdx) idx = parseInt(sIdx);
+            if (sWrong) wrongIndices = JSON.parse(sWrong);
+            updateDisplay();
+        }
 
         document.getElementById('user-input').addEventListener('keypress', (e) => { if(e.key==='Enter') check(); });
-        window.onload = () => changeCategory('all');
+        window.onload = load;
     </script>
 </body>
 </html>
